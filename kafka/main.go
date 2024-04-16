@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+const (
+	topic = "event-topic"
+)
+
 func main() {
 	globalCtx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
@@ -40,7 +44,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			if err := pro.Producer("kafka-test", "", body); err != nil {
+			if err := pro.Producer(topic, "", body); err != nil {
 				log.Printf("Producer msg error, err: %v", err)
 				return err
 			}
@@ -59,7 +63,7 @@ func main() {
 	group.Go(func() error {
 		csConfig := adapter.ConsumerConfig{
 			Config: adapter.Config{Address: "localhost:9092"},
-			Topics: "kafka-test",
+			Topics: topic,
 			Group:  "test_1",
 		}
 		consumer, err := adapter.NewConsumer(context.Background(), csConfig, handleFunc)
