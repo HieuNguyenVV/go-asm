@@ -238,12 +238,17 @@ func (repo *repoElastic) UpdateById() error {
 func (repo *repoElastic) UpdateByQuery() error {
 	query := elastic.NewTermQuery("active", true)
 
-	script := `ctx._source.age= 24;ctx._source.status=4`
+	//script := `ctx._source.age= 24;ctx._source.status=4`
+	script := `if (ctx._source.age == 24){
+			ctx._source.status = 9;
+			} else {
+            ctx._source.status = 5;
+            }`
 
 	updateResult, err := repo.client.UpdateByQuery().
 		Index(index).
 		Query(query).
-		Script(elastic.NewScriptInline(script).Lang("painless").Param("count", 1)).
+		Script(elastic.NewScriptInline(script).Lang("painless").Param("threshold", 18)).
 		Do(repo.context)
 
 	if err != nil {
